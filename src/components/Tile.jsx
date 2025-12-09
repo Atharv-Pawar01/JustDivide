@@ -1,12 +1,6 @@
 import React from 'react';
 
-/**
- * Tile Component
- * Renders a single number tile.
- */
 export default function Tile({ value, size, x, y, isInteractive = false, onDragStart, className = '' }) {
-
-    // Determine color based on value range
     const getColor = (v) => {
         if (v <= 3) return 'blue';
         if (v <= 6) return 'pink';
@@ -16,20 +10,17 @@ export default function Tile({ value, size, x, y, isInteractive = false, onDragS
     };
 
     const color = getColor(value);
-
-    // Map colors to asset filenames
     const assetMap = {
         blue: 'blue.png',
         pink: 'pink.png',
         orange: 'orange.png',
-        purple: 'purpule.png', // Note: typo in asset name preserved
+        purple: 'purpule.png',
         red: 'red.png'
     };
 
     const styles = {
         width: size,
         height: size,
-        // If x,y provided, absolute positioning (for drag ghost), else relative
         position: x !== undefined ? 'absolute' : 'relative',
         left: x,
         top: y,

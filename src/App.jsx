@@ -1,16 +1,11 @@
 import React, { useState, useEffect } from 'react';
 import './App.css';
-
-// Hooks
 import { useGameLogic } from './hooks/useGameLogic';
-
-// Components
 import Grid from './components/Grid';
 import Sidebar from './components/Sidebar';
 import Tile from './components/Tile';
 
 function App() {
-  // --- Game State from Hook ---
   const {
     grid, queue, keepVal, score, level, trashUses, bestScore, gameOver,
     time, isPaused, validHintMoves, showHints,
@@ -18,13 +13,10 @@ function App() {
     togglePause, handleUndo, toggleHint, calculateHints
   } = useGameLogic();
 
-  // --- Local UI State ---
   const [dragState, setDragState] = useState(null);
 
-  // --- Keyboard ShortCuts ---
   useEffect(() => {
     const handleKeyDown = (e) => {
-      // Shortcut Keys: Z=Undo, R=Restart, G=Hint
       if (e.key.toLowerCase() === 'z') {
         handleUndo();
       } else if (e.key.toLowerCase() === 'r') {
@@ -37,27 +29,19 @@ function App() {
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, [handleUndo, restartGame, toggleHint]);
 
-  // --- Drag and Drop Handlers ---
-
   const onDragStart = (e, value, source) => {
-    // Prevent default browser drag behavior
     e.preventDefault();
-
-    // Store drag info in local state
     setDragState({
       value,
       x: e.clientX,
       y: e.clientY,
       source
     });
-
-    // If hints are on, calculate them now for feedback
     if (showHints) calculateHints(value);
   };
 
   const handlePointerMove = (e) => {
     if (dragState) {
-      // Update position of the "ghost" tile
       setDragState({ ...dragState, x: e.clientX, y: e.clientY });
     }
   };
@@ -65,41 +49,34 @@ function App() {
   const handlePointerUp = (e) => {
     if (!dragState) return;
 
-    // Detect what element is under the mouse/finger
     const elements = document.elementsFromPoint(e.clientX, e.clientY);
     let handled = false;
 
-    // 1. Check if dropped on Grid
     const slot = elements.find(el => el.classList.contains('grid-slot'));
     if (slot) {
       const r = parseInt(slot.dataset.row);
       const c = parseInt(slot.dataset.col);
 
-      // Try to place the tile
       if (handleDropGrid(r, c, dragState.value, dragState.source === 'keep')) {
         handled = true;
       }
     }
 
-    // 2. Check if dropped on Keep Slot
     const keepSlot = elements.find(el => el.id === 'slot-keep' || el.closest('#slot-keep'));
     if (!handled && keepSlot) {
       handleKeep(dragState.value, dragState.source === 'keep');
       handled = true;
     }
 
-    // 3. Check if dropped on Trash
     const trashSlot = elements.find(el => el.id === 'slot-trash' || el.closest('#slot-trash'));
     if (!handled && trashSlot) {
       handleTrash(dragState.value, dragState.source === 'keep');
       handled = true;
     }
 
-    // Reset drag state
     setDragState(null);
   };
 
-  // --- Formatters ---
   const formatTime = (seconds) => {
     const m = Math.floor(seconds / 60).toString().padStart(2, '0');
     const s = (seconds % 60).toString().padStart(2, '0');
@@ -116,17 +93,14 @@ function App() {
     }
   };
 
-  // --- Render ---
   return (
     <div
       className="game-container"
       onPointerMove={handlePointerMove}
       onPointerUp={handlePointerUp}
-      // Touch support for mobile
       onTouchMove={(e) => { if (dragState) handlePointerMove(e.touches[0]); }}
       onTouchEnd={(e) => { if (dragState) handlePointerUp(e.changedTouches[0]); }}
     >
-      {/* --- Top Controls --- */}
       <div className="icon-btn-top btn-pause" onClick={togglePause}>
         {isPaused ? '▶' : '||'}
       </div>
@@ -146,12 +120,10 @@ function App() {
         <div className="badge badge-right">SCORE {score}</div>
       </div>
 
-      {/* --- Main Game Grid --- */}
       <div className="grid-wrapper">
         <Grid grid={grid} hintMoves={validHintMoves} />
       </div>
 
-      {/* --- Sidebar (Queue, Keep, Trash) --- */}
       <Sidebar
         queue={queue}
         keepVal={keepVal}
@@ -161,14 +133,12 @@ function App() {
         level={level}
       />
 
-      {/* --- Drag Ghost Element --- */}
       {dragState && (
         <div className="drag-ghost" style={{ left: dragState.x, top: dragState.y }}>
           <Tile value={dragState.value} size={140} />
         </div>
       )}
 
-      {/* --- Overlays --- */}
       {gameOver && (
         <div style={{
           position: 'absolute', top: 0, left: 0, width: '100%', height: '100%',

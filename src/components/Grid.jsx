@@ -2,8 +2,6 @@ import React, { } from 'react';
 import Tile from './Tile';
 
 export default function Grid({ grid, hintMoves = [] }) {
-
-    // Check if a specific cell should be highlighted as a hint
     const isHint = (r, c) => {
         return hintMoves.some(m => m.r === r && m.c === c);
     };
@@ -17,7 +15,6 @@ export default function Grid({ grid, hintMoves = [] }) {
                         return (
                             <div
                                 key={`${rIndex}-${cIndex}`}
-                                // .grid-slot class is used for hit detection during drag
                                 className={`grid-slot ${highlighted ? 'hint-highlight' : ''}`}
                                 data-row={rIndex}
                                 data-col={cIndex}
